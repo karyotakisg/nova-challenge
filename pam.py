@@ -45,9 +45,11 @@ def scrape_article_urls(url, soup):
     parsed_url = urlparse(url)
     domain = parsed_url.netloc.split('.')[1]  # Extract the domain name
     # Find all article links
-    for link in soup.select('a[href^="http"]'):
+    print(soup.select('a[href^="https"]'))
+    for link in soup.select('a[href^="https"]'):
         link_url = link['href']
         parsed_link = urlparse(link_url)
+        
         try:
             link_domain = parsed_link.netloc.split('.')[1]  # Extract the domain name from the link
         except IndexError:
@@ -56,6 +58,7 @@ def scrape_article_urls(url, soup):
         # Check if the link starts with the same domain and has at least 4 subdomains
         if link_domain == domain and len(link_path_components) >= 5:
             article_urls.append(link_url)
+            print(link_url)
     return article_urls
     
 
@@ -107,6 +110,10 @@ def main():
             article_urls = scrape_article_urls(url, soup)
             website = url.split(".")[1].split(".")[0]
         for article_url in article_urls:
+            response = requests.get(article_url)
+            
+            if response.status_code == 200:
+                soup = BeautifulSoup(response.content, 'html.parser')
             html_parser, title = scrape_article_keywords_and_title(soup)
             body = scrape_article_text(html_parser)
             add_to_json(website, title, body)
