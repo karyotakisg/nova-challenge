@@ -7,6 +7,15 @@ import wandb
 from openai import OpenAI
 import re
 
+def create_json():
+    data = {
+        "title": "",
+        "keywords": "",
+        "body": ""
+    }
+    with open('data.json', 'w') as file:
+        json.dump(data, file)
+    return data
 
 def scrape_article_keywords(article_url):
     response = requests.get(article_url)
@@ -77,8 +86,7 @@ def main():
         for article_url in article_urls:
             print("Scraping keywords from article:", article_url)
             html_parser, keywords = scrape_article_keywords(article_url)
-            with open('output.txt', 'w', encoding='utf-8') as file:
-                file.write(scrape_article_text(html_parser))
+            body = scrape_article_text(html_parser)
             if keywords:
                 keywords_by_article[article_url] = keywords
                 print("Keywords collected:", keywords)
