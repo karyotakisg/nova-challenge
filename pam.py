@@ -5,7 +5,7 @@ import json
 import os
 import wandb
 from openai import OpenAI
-client = OpenAI()
+import re
 
 
 def scrape_article_keywords(article_url):
@@ -13,9 +13,13 @@ def scrape_article_keywords(article_url):
     if response.status_code == 200:
         soup = BeautifulSoup(response.content, 'html.parser')
         keywords = [meta.attrs.get('content') for meta in soup.find_all('meta', attrs={'name': 'keywords'})]
-        return keywords
+        return soup, keywords
     else:
         return None
+def scrape_article_text(soup):
+    pure_text = soup.get_text()
+    pure_text = re.sub(r'\s+', ' ', pure_text.strip())
+    return pure_text
 
 # Function to scrape article URLs from a website
 def scrape_article_urls(url):
@@ -61,19 +65,20 @@ def main():
 
     # Scrape article URLs for each website
     for url in urls:
-        print("Scraping from:", url)
+        print("Scraping from:", url)  
         article_urls = scrape_article_urls(url)
         if article_urls:
             article_urls_by_website[url] = article_urls
             print("Article URLs collected:", len(article_urls))
         else:
             print("Failed to scrape article URLs from website:", url)
-
     # Scrape keywords for each article URL
     for website, article_urls in article_urls_by_website.items():
         for article_url in article_urls:
             print("Scraping keywords from article:", article_url)
-            keywords = scrape_article_keywords(article_url)
+            html_parser, keywords = scrape_article_keywords(article_url)
+            with open('output.txt', 'w', encoding='utf-8') as file:
+                file.write(scrape_article_text(html_parser))
             if keywords:
                 keywords_by_article[article_url] = keywords
                 print("Keywords collected:", keywords)
