@@ -1,43 +1,39 @@
 import requests
-from bs4 import BeautifulSoup, SoupStrainer
+from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 import json
-import os
 import re
 
 def create_json(website):
     data = {
         "title": "",
-        "keywords": "",
         "body": ""
     }
     with open(website+'.json', 'w') as file:
         json.dump(data, file)
     return data
 
-def add_to_json(website, title, keywords, body):
+def add_to_json(website, title, body):
     # Create a dictionary with article data
     article_data = {
         "title": title,
-        "keywords": keywords,
         "body": body
     }
     try:
         with open(website+".json", 'r+', encoding='utf-8') as file:
             data = json.load(file)
-    except:
+    except FileNotFoundError:
         data = []
     data.append(article_data)
     with open(website+".json", 'w', encoding='utf-8') as file:
         json.dump(data, file, ensure_ascii=False, indent=4)
 
 def scrape_article_keywords_and_title(soup):
-    keywords = list(meta.attrs.get('content') for meta in soup.find_all('meta', attrs={'name': 'keywords'}))
     title_tag = soup.title
     if title_tag is not None:
         # Get the text of the title
         title = title_tag.get_text()
-        return soup, keywords, title
+        return soup, title
 
 def scrape_article_text(soup):
     pure_text = soup.get_text()
@@ -80,9 +76,12 @@ def main():
             article_urls = scrape_article_urls(url, soup)
             website = url.split(".")[1].split(".")[0]
         for article_url in article_urls:
-            html_parser, keywords, title = scrape_article_keywords_and_title(soup)
+            html_parser, title = scrape_article_keywords_and_title(soup)
             body = scrape_article_text(html_parser)
-            add_to_json(website, title, keywords, body)
+            add_to_json(website, title, body)
+
            
 if __name__ == "__main__":
+
     main()
+
