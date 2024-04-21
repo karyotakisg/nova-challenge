@@ -1,6 +1,6 @@
 from anthropic import AnthropicBedrock
 import os
-def call_api(prompt):
+def call_api(prompt, question):
     client = AnthropicBedrock(
         # Authenticate by either providing the keys below or use the default AWS credential providers, such as
         # using ~/.aws/credentials or the "AWS_SECRET_ACCESS_KEY" and "AWS_ACCESS_KEY_ID" environment variables.
@@ -13,7 +13,9 @@ def call_api(prompt):
         # and if that's not present, we default to us-east-1. Note that we do not read ~/.aws/config for the region.
         aws_region ="us-west-2",
     )
-
+    prompt = "Μέ βάση τα δεδομένα: " + prompt + "Απάντησε στην εξής ερώτηση:" + question + \
+    "Προσπάθησε να χρησιμοποιείς ιστορικά δεδομένα και αφαίρεσε όλους τους ειδικους" + \
+    "χαρακτήρες οπως ' slash n'. Κάνε το κείμενο φιλικό προς τον χρήστη και ολοκλήρωσε ολες τις προτάσεις με σημεία στίξης. Αν δεν βρίσκεις απάντηση από τα δεδομένα που σου εδωσα απάντησε με τις γνώσεις σου που έχεις"
     message = client.messages.create(
         model="anthropic.claude-3-sonnet-20240229-v1:0",
         max_tokens=256,

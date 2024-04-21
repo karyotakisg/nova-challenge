@@ -1,13 +1,14 @@
 import tkinter as tk
 from tkinter import scrolledtext
+import bedrock
 import claude_api
 class GPTChatterApp:
     def __init__(self, master):
         self.master = master
-        master.title("GPT Chatter")
+        master.title("Chatbot")
 
         # Title
-        self.title_label = tk.Label(master, text="Chatter of News", font=("Helvetica", 16, "bold"))
+        self.title_label = tk.Label(master, text="Nova Knowledge manager", font=("Helvetica", 16, "bold"))
         self.title_label.pack(pady=10)
 
         # Frame to contain the chat history
@@ -38,15 +39,15 @@ class GPTChatterApp:
     
     def get_response(self):
         question = self.get_user_input()
-        response = claude_api.call_api(question)  # Replace with actual response logic
-
+        response = bedrock.return_response(question)
+        response = claude_api.call_api(response, question)
         # Display question and response in the chat history
-        self.update_chat_history(question, response)
+        self.update_chat_history(question, response[0].text)
 
     def update_chat_history(self, question, response):
         self.chat_history.configure(state='normal')
         self.chat_history.insert(tk.END, "\nYou: " + question)
-        self.chat_history.insert(tk.END, "\nGPT Chatter: " + str(response))
+        self.chat_history.insert(tk.END, "\nKnowledge Base Chatter: " + str(response))
         self.chat_history.configure(state='disabled')
 
         # Clear the input field after submitting
