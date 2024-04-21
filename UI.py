@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import scrolledtext
-
+import claude_api
 class GPTChatterApp:
     def __init__(self, master):
         self.master = master
@@ -15,9 +15,9 @@ class GPTChatterApp:
         self.chat_frame.pack(expand=True, fill='both', padx=10, pady=10)
 
         # Text area for displaying chat history
-        self.chat_history = scrolledtext.ScrolledText(self.chat_frame, wrap=tk.WORD, width=60, height=20)  # Adjusted width and height
+        self.chat_history = scrolledtext.ScrolledText(self.chat_frame, wrap=tk.WORD, width=60, height=20)
         self.chat_history.pack(expand=True, fill='both')
-        self.chat_history.configure(state='disabled')  # Set the chat history to be read-only
+        self.chat_history.configure(state='disabled')
 
         # Label for the user input
         self.input_label = tk.Label(master, text="Ask a Question:")
@@ -26,23 +26,28 @@ class GPTChatterApp:
         # Entry widget for user input
         self.user_input = tk.Text(master, wrap="word", width=60, height=3)
         self.user_input.pack()
-        ##self.user_input.bind("<Return>", lambda event: self.get_response())  # Bind the Return key to get_response
 
         # Submit button
         self.submit_button = tk.Button(master, text="Submit", command=self.get_response)
-        self.submit_button.pack()
-        self.submit_button.pack(pady=9)  # Adding a little space under the submit button
+        self.submit_button.pack(pady=9)
 
 
-    def get_response(self):  # Removed event=None to match the method signature
-        question = self.user_input.get("1.0", tk.END).strip()
-        response = "Response to '" + question + "' goes here."  # Replace this line with your response logic
+
+    def get_user_input(self):
+        return self.user_input.get("1.0", tk.END).strip()
+    
+    def get_response(self):
+        question = self.get_user_input()
+        response = claude_api.call_api(question)  # Replace with actual response logic
 
         # Display question and response in the chat history
-        self.chat_history.configure(state='normal')  # Set state to normal to modify the text
-        self.chat_history.insert(tk.END, "\n\nYou: " + question)
-        self.chat_history.insert(tk.END, "\nGPT Chatter: " + response)
-        self.chat_history.configure(state='disabled')  # Set the state back to disabled
+        self.update_chat_history(question, response)
+
+    def update_chat_history(self, question, response):
+        self.chat_history.configure(state='normal')
+        self.chat_history.insert(tk.END, "\nYou: " + question)
+        self.chat_history.insert(tk.END, "\nGPT Chatter: " + str(response))
+        self.chat_history.configure(state='disabled')
 
         # Clear the input field after submitting
         self.user_input.delete("1.0", tk.END)
